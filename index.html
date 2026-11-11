@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>極青龍練習場</title>
+    <meta name="claude:viewport-fit-sides" content="cover" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="stage"></div>
+    <div id="flash" class="hud"></div>
+
+    <details id="panel" class="hud box" open>
+      <summary>
+        <span class="eyebrow">FF14 4.5 · 極蠻神練習場</span>
+        <span class="ttl">極青龍征魂戰<small>The Wreath of Snakes (Extreme)</small></span>
+      </summary>
+      <div class="fields">
+        <label
+          >練習範圍
+          <select id="mode">
+            <option value="all" selected>全程（依序）</option>
+            <option value="p1">第一階段（九字切～石頭怪）</option>
+            <option value="p2">第二階段（蛇潮～狂暴）</option>
+            <option value="open">陰陽五行＋九字切＋紅圈</option>
+            <option value="sigil">固定鋼鐵（太極之印）</option>
+            <option value="curse">咒怨的替身（換 T）</option>
+            <option value="wheel">車輪怪（紅藍直線）</option>
+            <option value="rock">石頭怪（揮打＋四風＋截線）</option>
+            <option value="snake">轉場＋蛇潮</option>
+            <option value="yama">大太法師手印＋自然之力＋蛇潮</option>
+            <option value="stack">直線分攤＋荒魂燃燒</option>
+            <option value="inout">鋼鐵月環→九字切→鋼鐵月環</option>
+            <option value="tower">升龍踩塔＋AC 分攤</option>
+            <option value="curse2">全屏＋死刑 ×2</option>
+            <option value="rock2">石頭怪＋鋼鐵月環→截線→車輪怪→紅圈</option>
+            <option value="mid">九字切→大太蛇潮×2→AC 分攤</option>
+            <option value="final">鋼鐵月環→升龍踩塔→九字切→狂暴</option>
+          </select>
+        </label>
+        <label
+          >我的職能
+          <select id="role">
+            <option>MT</option>
+            <option>ST</option>
+            <option>H1</option>
+            <option>H2</option>
+            <option selected>D1</option>
+            <option>D2</option>
+            <option>D3</option>
+            <option>D4</option>
+          </select>
+        </label>
+        <label class="chk"
+          ><input type="checkbox" id="hintMe" checked /> 提示我現在該站哪（金色圈＋文字）</label
+        >
+        <div class="group">
+          <h3>變體（預設隨機）</h3>
+          <label
+            >紅圈點名
+            <select id="markVar">
+              <option value="rand" selected>隨機</option>
+              <option value="D">DPS 4 人</option>
+              <option value="S">坦補 4 人</option>
+            </select>
+          </label>
+          <label
+            >藍色車輪連線
+            <select id="blueVar">
+              <option value="rand" selected>隨機</option>
+              <option value="H1">H1</option>
+              <option value="H2">H2</option>
+            </select>
+          </label>
+          <label
+            >陰陽之印順序
+            <select id="sigilVar">
+              <option value="rand" selected>隨機</option>
+              <option value="outin">先鋼鐵後月環</option>
+              <option value="inout">先月環後鋼鐵</option>
+            </select>
+          </label>
+          <label
+            >蛇潮出現方向
+            <select id="snakeVar">
+              <option value="rand" selected>隨機</option>
+              <option value="N">北</option>
+              <option value="E">東</option>
+              <option value="S">南</option>
+              <option value="W">西</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button id="go" type="button">開始（Enter）</button>
+      <p class="note">
+        依 B 站菓子〈極青龍征魂戰 超詳解攻略〉：場標 A 北、B 東、C 南、D 西；踩塔搭檔 MT/D1、ST/D2、H1/D3、H2/D4；
+        AC 分攤 A 組（MT・ST・H1・D4）往北、C 組（D1・D2・D3・H2）往南。範圍大小與時間為推估值。
+      </p>
+    </details>
+
+    <div id="timeline" class="hud box" hidden>
+      <h4>時間軸</h4>
+      <div id="tlList"></div>
+    </div>
+
+    <div id="cast" class="hud box" hidden>
+      <div class="castname" id="castName"></div>
+      <div class="bar"><div class="fill" id="castFill"></div></div>
+      <div id="advice"></div>
+    </div>
+
+    <div id="gauge" class="hud box" hidden>
+      <span></span>
+      <div class="bar"><div class="fill" id="gaugeFill"></div></div>
+    </div>
+
+    <div id="me" class="hud box">
+      <div id="meRole">D1・DPS 組</div>
+      <div id="meDeb"></div>
+      <div class="rec" id="meRec">通過 0 / 嘗試 0</div>
+    </div>
+
+    <div id="help" class="hud box">
+      <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移動　<kbd>空白</kbd> 跳躍　拖曳 轉視角　滾輪
+      縮放　<kbd>Enter</kbd>
+      開始／重來
+    </div>
+
+    <div id="banner" class="hud box intro">
+      <h2>極青龍征魂戰 練習場</h2>
+      <p>
+        全程依序：九字切＋紅圈 → 固定鋼鐵 → 換 T → 車輪怪 → 石頭怪 → 轉場蛇潮 → 大太法師 → 分攤＋荒魂燃燒 →
+        鋼鐵月環＋九字切 → 升龍踩塔＋AC 分攤 → 死刑 ×2 → … → 狂暴。也可以在左側「練習範圍」單選一段。
+      </p>
+      <p class="sub">其他 7 人由 NPC 照攻略走位，你只控制自己。站錯會立刻停下並說明原因。</p>
+      <p class="sub">按「開始」或 Enter（空白鍵也可以開始，進行中空白鍵是跳躍）。</p>
+    </div>
+
+    <div id="joy" class="hud" hidden><div id="knob"></div></div>
+    <div id="err" class="hud" hidden></div>
+
+    <script src="js/boot.js"></script>
+  </body>
+</html>
