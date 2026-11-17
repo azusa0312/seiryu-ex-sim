@@ -39,14 +39,41 @@ function snakeWall(side, life) {
 }
 // 蛇的位置 → 推的方向（往對面）
 const snakeDir = (side) => dirOf((DIR_ANG[side] + 180) % 360);
+// 擊退箭頭：起點 o、方向 d、長 l（箭身＋三角箭頭）
+function kbArrow(o, d, l, color, w = 0.7) {
+  const g = new T.Group();
+  const head = Math.min(2.4, l * 0.35);
+  g.add(lineMesh(o, d, l - head, w / 2, color, 0.75, 0.12));
+  const sh = new T.Shape();
+  sh.moveTo(-w * 1.6, 0);
+  sh.lineTo(w * 1.6, 0);
+  sh.lineTo(0, head);
+  sh.closePath();
+  const tri = new T.Mesh(new T.ShapeGeometry(sh).rotateX(Math.PI / 2), groundMat(color, 0.9));
+  const tip = P(o.x + d.x * (l - head), o.z + d.z * (l - head));
+  tri.position.set(tip.x, 0.13, tip.z);
+  tri.rotation.y = Math.atan2(d.x, d.z);
+  g.add(tri);
+  return g;
+}
+// 蛇潮：整片箭頭從蛇那側指向對面，標示「擊退 22m」
 function snakeArrows(side, life) {
   const d = snakeDir(side),
-    g = new T.Group();
-  [-10, 0, 10].forEach((o) => {
-    const perp = { x: -d.z, z: d.x };
-    const s = posAt(DIR_ANG[side], 16);
-    g.add(lineMesh(P(s.x + perp.x * o, s.z + perp.z * o), d, 10, 0.5, 0x8ff0a0, 0.55, 0.1));
+    g = new T.Group(),
+    perp = { x: -d.z, z: d.x };
+  [-12, -6, 0, 6, 12].forEach((o) => {
+    const s = posAt(DIR_ANG[side], 15 - Math.abs(o) * 0.35);
+    g.add(kbArrow(P(s.x + perp.x * o, s.z + perp.z * o), d, 11, 0x8ff0a0));
   });
+  const lp = posAt(DIR_ANG[side], 6);
+  g.add(floatLabel(`蛇潮擊退 ${SNAKE_PUSH}m`, '#a8ffb8', lp.x, lp.z, 2.6, 1.3));
+  return omen(g, life);
+}
+// 自然之力：中心往外 8 個方向的箭頭，標示「擊退 10m」
+function forceArrows(life) {
+  const g = new T.Group();
+  for (let a = 0; a < 360; a += 45) g.add(kbArrow(posAt(a, 2.2), dirOf(a), FORCE_PUSH - 1, 0xb0f0ff, 0.55));
+  g.add(floatLabel(`中心擊退 ${FORCE_PUSH}m`, '#c8f6ff', 0, 0, 7.5, 1.3));
   return omen(g, life);
 }
 // 站位：往蛇那一側 dd 公尺，左右散開
@@ -151,10 +178,12 @@ function forceAndSnakes(side, next) {
   setCast('自然之力', `從中心往外擊退 ${FORCE_PUSH}m，接著${DIR_NAME[side]}邊的蛇潮推 ${SNAKE_PUSH}m`, LEN);
   advice = `離開正中央、往${DIR_NAME[side]}（蛇那側）站約 5m：先被彈到${DIR_NAME[side]}邊，再被蛇推回島上。`;
   const ring = omen(ringMesh(0, 0, 1, 2.2, 0xb0f0ff, 0.6), LEN);
+  const fa = forceArrows(LEN);
   setPlan(snakeSpot(side, 5.5), 0.3);
   at(t + LEN, () => {
     if (state !== 'running') return;
     removeFx(ring);
+    removeFx(fa);
     strongFlash(ringMesh(0, 0, 0.5, ARENA_R, 0xb0f0ff, 0.25));
     const away = snakeDir(side);
     const r = knockAll((m) => {
@@ -213,11 +242,11 @@ const AC_SPOT = {
   H1: P(0, -12),
   MT: P(-0.9, -7.5),
   ST: P(0.9, -7.5),
-  D4: P(0, -9.5),
   H2: P(0, 12),
   D1: P(-0.9, 7.5),
   D2: P(0.9, 7.5),
-  D3: P(0, 9.5),
+  D3: P(-0.9, 9.5),
+  D4: P(0.9, 9.5),
 };
 function stackLine(healer) {
   const h = byId(healer);
