@@ -238,12 +238,26 @@ function pickMarked() {
   const g = variant('markVar', ['D', 'S']);
   return members.filter((m) => m.grp === g);
 }
+// 點名當下就在腳下顯示紅圈範圍（跟著人移動），方便看出要離誰多遠
 function markRed(list) {
-  list.forEach((m) => setTag(m, '紅圈', '#ff6b6b'));
+  list.forEach((m) => {
+    setTag(m, '紅圈', '#ff6b6b');
+    const g = new T.Group();
+    g.add(circleMesh(0, 0, DESC_R, 0xff4040, 0.16, 0.1), ringMesh(0, 0, DESC_R - 0.18, DESC_R, 0xff5050, 0.95, 0.11));
+    g.renderOrder = 8;
+    m.redFx = omen(g, 60);
+    tick(() => {
+      if (!g.parent) return true;
+      g.position.set(m.x, 0, m.z);
+      return false;
+    });
+  });
 }
 function redCircleHit(list) {
   const r = [];
   list.forEach((mk) => {
+    if (mk.redFx) removeFx(mk.redFx);
+    mk.redFx = null;
     strongFlash(circleMesh(mk.x, mk.z, DESC_R, 0xff5050, 0.45));
     members.forEach((m) => {
       if (m !== mk && dist(m, mk) < DESC_R)

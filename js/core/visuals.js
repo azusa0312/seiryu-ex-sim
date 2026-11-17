@@ -11,7 +11,13 @@ function labelTex(text, color) {
   cv.width = 256;
   cv.height = 96;
   const g = cv.getContext('2d');
-  g.font = '700 46px "Noto Sans TC",system-ui,sans-serif';
+  // 字太長就縮小，避免被畫布裁掉
+  let fs = 46;
+  g.font = `700 ${fs}px "Noto Sans TC",system-ui,sans-serif`;
+  while (fs > 22 && g.measureText(text).width > 236) {
+    fs -= 2;
+    g.font = `700 ${fs}px "Noto Sans TC",system-ui,sans-serif`;
+  }
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.lineWidth = 8;

@@ -24,8 +24,8 @@ const ROLE_INFO = {
 const ROLE_IDS = Object.keys(ROLE_INFO);
 // 升龍踩塔的固定搭檔（影片：MT/D1、ST/D2、H1/D3、H2/D4）
 const PARTNER = { MT: 'D1', D1: 'MT', ST: 'D2', D2: 'ST', H1: 'D3', D3: 'H1', H2: 'D4', D4: 'H2' };
-// AC 分攤：A 組（北，H1 引導）／C 組（南，H2 引導）
-const AC_GROUP = { MT: 'A', ST: 'A', H1: 'A', D4: 'A', D1: 'C', D2: 'C', D3: 'C', H2: 'C' };
+// AC 分攤：A 組 H1・MT・ST（北，H1 引導）／C 組 D1～D4・H2（南，H2 引導）
+const AC_GROUP = { MT: 'A', ST: 'A', H1: 'A', D1: 'C', D2: 'C', D3: 'C', D4: 'C', H2: 'C' };
 
 // 場標：影片示意圖 A 北、B 東、C 南、D 西，都在場邊
 const WAYMARKS = {
